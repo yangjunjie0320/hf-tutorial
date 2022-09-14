@@ -5,7 +5,8 @@ import scipy
 # Use eigh to diagonalize matrices
 from scipy.linalg import eigh
 
-def solve_hf(hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray, tol: float = 1e-8) -> numpy.ndarray:
+def solve_hf(hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
+             max_iter :int = 100, tol: float = 1e-8) -> numpy.ndarray:
     """
     Solve the Hartree-Fock with SCF iterations.
     Reference: Szabo and Ostlund, 3.4.6. (p. 146, start from step 2)
@@ -28,6 +29,8 @@ def solve_hf(hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray, tol:
             The two-electron repulsion integrals.
         tol : float, optional
             The convergence tolerance, by default 1e-8.
+        max_iter : int, optional
+            The maximum number of iterations, by default 100.
     """
 
     nao = hcore.shape[0]
@@ -36,6 +39,28 @@ def solve_hf(hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray, tol:
     assert eri.shape   == (nao, nao, nao, nao)
 
     print("Great! We are ready to solve the Hartree-Fock equations...")
+
+    iter_scf     = 0
+    is_converged = False
+    is_max_iter  = False
+
+    ene_hf = None
+
+    while not is_converged and not is_max_iter:
+        
+        ene_hf = 0.0
+
+        if ene_hf is not None:
+            print(f"SCF iteration {iter_scf:3d} : energy = {ene_hf: 12.8f}")
+
+        iter_scf += 1
+        is_max_iter  = iter_scf >= max_iter
+        is_converged = False
+
+    if is_converged:
+        print(f"SCF converged in {iter_scf} iterations.")
+    else:
+        print(f"SCF did not converge in {max_iter} iterations.")
 
 def main(inp: str) -> None:
     """
