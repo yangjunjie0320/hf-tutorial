@@ -6,16 +6,19 @@ import scipy
 from scipy.linalg import eigh
 
 def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
-              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> numpy.ndarray:
+              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
     """
     Solve the Hartree-Fock with SCF iterations.
     Reference: Szabo and Ostlund, 3.4.6. (p. 146, start from step 2)
 
     The SCF procedure is:
-        - Initialize the density matrix by diagonalizing the core Hamiltonian
-        - Compute the Fock matrix
-        - Diagonalize the Fock matrix
-        - Compute the new density matrix
+        - Obtain a guess at the density matrix.
+        - Calculate the exchange and coulomb matrices from the density matrix
+          and the two-electron repulsion integrals.
+        - Add exchange and coulomb matrices to the core-Hamiltonian to obtain the
+          Fock matrix.
+        - Diagonalize the Fock matrix.
+        - Select the occupied orbitals and calculate the new density matrix.
         - Compute the energy
         - Compute the errors and check convergence
             - If converged, return the energy
@@ -86,6 +89,10 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
 
     return ene_rhf
 
+def solve_uhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
+              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
+    raise NotImplementedError
+
 def main(inp: str) -> None:
     """
     The main function of the program.
@@ -118,21 +125,37 @@ def main(inp: str) -> None:
 
         ene_rhf_ref = numpy.load(f"{int_dir}/ene_rhf.npy")
         ene_uhf_ref = numpy.load(f"{int_dir}/ene_uhf.npy")
-
-        # Implement the Hartree-Fock with SCF iterations 
+    
+        # Implement the restricted Hartree-Fock method
         ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
 
+        # Implement the unrestricted Hartree-Fock method
+        # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
+
+        import sol
         # This is the solution for RHF from Junjie, uncomment this to run it.
-        # import sol
-        # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
+        # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
 
         print(f"RHF energy: {ene_rhf: 12.8f}, reference: {ene_rhf_ref: 12.8f}, error: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
-
         assert abs(ene_rhf - ene_rhf_ref) < tol
+
+        return ene_rhf
     
     else:
         raise RuntimeError("Invalid input.")
 
 if __name__ == "__main__":
-    inp = "h2o-1.0"
-    main(inp)
+    mol = "h2"
+    r   = 1.0
+    inp = f"h2-{r:.4f}"
+    e = main(inp)
+
+    mol = "heh+"
+    r   = 1.0
+    inp = f"{mol}-{r:.4f}"
+    e = main(inp)
+
+    mol = "h2o"
+    r   = 1.0
+    inp = f"{mol}-{r:.4f}"
+    e = main(inp)

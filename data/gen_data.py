@@ -38,15 +38,16 @@ def gen_data(inp):
                 verbose = 0,
             )
 
-        m = pyscf.gto.M(
-            atom = f'''
-                O
-                H  1  {r: 6.4f}
-                H  1  {r: 6.4f}  2 105
-            ''',
-            basis = 'sto-3g',
-            verbose = 0,
-        )
+        elif mol == 'h2o':
+            m = pyscf.gto.M(
+                atom = f'''
+                    O
+                    H  1  {r: 6.4f}
+                    H  1  {r: 6.4f}  2 105
+                ''',
+                basis = 'sto-3g',
+                verbose = 0,
+            )
 
     else:
         raise RuntimeError("Invalid input.")
@@ -90,7 +91,6 @@ def gen_data(inp):
     numpy.save(f"{int_dir}/eri.npy", eri)
 
 if __name__ == "__main__":
-
     for r in numpy.linspace(0.5, 2.5, 21):
         inp = f"h2-{r:.4f}"
         gen_data(inp)

@@ -5,7 +5,7 @@ import scipy
 from scipy.linalg import eigh
 
 def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
-              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> numpy.ndarray:
+              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
 
     nelec_alph, nelec_beta = nelecs
     assert nelec_alph == nelec_beta, "This code only supports closed-shell systems."
