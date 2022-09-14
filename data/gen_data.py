@@ -52,9 +52,9 @@ def gen_data(inp):
         raise RuntimeError("Invalid input.")
 
     assert int_dir is not None
-    if os.path.exists(f"{int_dir}"):
+    if os.path.exists(int_dir):
         import shutil
-        shutil.rmtree(f"{int_dir}")
+        shutil.rmtree(int_dir)
         os.makedirs(int_dir)
 
     mf = pyscf.scf.RHF(m)
