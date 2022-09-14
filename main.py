@@ -79,5 +79,5 @@ def main(inp: str) -> None:
     solve_hf(hcore, ovlp, eri, tol=1e-8)
 
 if __name__ == "__main__":
-    inp = "h2-0.7"
+    inp = "heh+-0.7"
     main(inp)
