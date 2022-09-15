@@ -9,9 +9,9 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
 
     nelec_alph, nelec_beta = nelecs
     assert nelec_alph == nelec_beta, "This code only supports closed-shell systems."
-    
+
     nao = hcore.shape[0]
-    
+
     assert hcore.shape == (nao, nao)
     assert ovlp.shape  == (nao, nao)
     assert eri.shape   == (nao, nao, nao, nao)
@@ -56,7 +56,7 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
         # Compute the energy
         ene_cur = 0.5 * numpy.einsum("pq,pq->", hcore + fock, dm_cur)
         ene_rhf = ene_cur + ene_nuc
-        
+
         # Compute the errors
         if ene_old is not None:
             dm_err  = numpy.linalg.norm(dm_cur - dm_old)
@@ -65,7 +65,7 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
 
         dm_old  = dm_cur
         ene_old = ene_cur
-        
+
         # Check convergence
         iter_scf += 1
         is_max_iter  = iter_scf >= max_iter
