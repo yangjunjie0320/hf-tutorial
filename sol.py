@@ -81,3 +81,4 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
             print("SCF is not running.")
 
     return ene_rhf
+

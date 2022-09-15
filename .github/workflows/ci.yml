@@ -42,9 +42,7 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 --count --exit-zero --max-complexity=10 \
-                 --statistics --config .flake8 libdmet
+          flake8 --config .flake8 .
 
       - name: Install and Test
         run: ./.github/workflows/run_ci.sh

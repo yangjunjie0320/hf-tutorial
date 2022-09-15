@@ -98,3 +98,4 @@ if __name__ == "__main__":
         gen_data(inp)
         inp = f"h2o-{r:.4f}"
         gen_data(inp)
+
