@@ -1,0 +1,59 @@
+# refs: https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
+#
+# Contributors to the evolution of this form:
+#
+# yangdatou
+# zhcui
+# penglinq
+#
+
+name: CI
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+  # Replace pull_request with pull_request_target if you
+  # plan to use this action with forks, see the Limitations section
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: write
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        python-version: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install testing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest pytest-codecov codecov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint with flake8
+        run: |
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 --count --exit-zero --max-complexity=10 \
+                 --statistics --config .flake8 libdmet
+
+      - name: Install and Test
+        run: ./.github/workflows/run_ci.sh

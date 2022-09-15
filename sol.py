@@ -29,7 +29,7 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
 
     nmo  = nao
     nocc = (nelec_alph + nelec_beta) // 2
-    mo_occ = numpy.zeros(nmo, dtype=numpy.int)
+    mo_occ = numpy.zeros(nmo, dtype=int)
     mo_occ[:nocc] = 2
     occ_list = numpy.where(mo_occ > 0)[0]
 
