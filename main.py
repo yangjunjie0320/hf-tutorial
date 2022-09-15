@@ -136,7 +136,7 @@ def main(inp: str) -> None:
         # This is the solution for RHF from Junjie, uncomment this to run it.
         # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
 
-        print(f"RHF energy: {ene_rhf: 12.8f}, reference: {ene_rhf_ref: 12.8f}, error: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
+        print(f"RHF energy: {ene_rhf: 12.8f}, Ref: {ene_rhf_ref: 12.8f}, Err: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
         assert abs(ene_rhf - ene_rhf_ref) < tol
 
         return ene_rhf
@@ -159,3 +159,4 @@ if __name__ == "__main__":
     r   = 1.0
     inp = f"{mol}-{r:.4f}"
     e = main(inp)
+
