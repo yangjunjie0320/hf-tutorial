@@ -146,17 +146,17 @@ def main(inp: str) -> None:
 
 if __name__ == "__main__":
     mol = "h2"
-    r   = 1.0
-    inp = f"h2-{r:.4f}"
-    e = main(inp)
+    bl   = 1.0
+    inp = f"h2-{bl:.4f}"
+    ene = main(inp)
 
     mol = "heh+"
-    r   = 1.0
-    inp = f"{mol}-{r:.4f}"
-    e = main(inp)
+    bl   = 1.0
+    inp = f"{mol}-{bl:.4f}"
+    ene = main(inp)
 
     mol = "h2o"
-    r   = 1.0
-    inp = f"{mol}-{r:.4f}"
-    e = main(inp)
+    bl   = 1.0
+    inp = f"{mol}-{bl:.4f}"
+    ene = main(inp)
 
