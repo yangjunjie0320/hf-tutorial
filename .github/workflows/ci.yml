@@ -1,12 +1,3 @@
-# refs: https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
-#
-# Contributors to the evolution of this form:
-#
-# yangdatou
-# zhcui
-# penglinq
-#
-
 name: CI
 
 on:
