@@ -124,7 +124,7 @@ def main(inp: str) -> None:
         ene_nuc = numpy.load(f"{int_dir}/ene_nuc.npy")
 
         ene_rhf_ref = numpy.load(f"{int_dir}/ene_rhf.npy")
-        ene_uhf_ref = numpy.load(f"{int_dir}/ene_uhf.npy")
+        # ene_uhf_ref = numpy.load(f"{int_dir}/ene_uhf.npy")
     
         # Implement the restricted Hartree-Fock method
         ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
