@@ -1,0 +1,6 @@
+name: hf-tutorial-test
+
+dependencies:
+  - numpy
+  - scipy
+  - pyscf
