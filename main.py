@@ -5,6 +5,8 @@ import scipy
 # Use eigh to diagonalize matrices
 from scipy.linalg import eigh
 
+import sol
+
 def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
               ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
     """
@@ -126,15 +128,13 @@ def main(inp: str) -> None:
         ene_rhf_ref = numpy.load(f"{int_dir}/ene_rhf.npy")
         # ene_uhf_ref = numpy.load(f"{int_dir}/ene_uhf.npy")
     
-        # Implement the restricted Hartree-Fock method
+        # Implement your restricted Hartree-Fock algorithm here.
         ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
-
-        # Implement the unrestricted Hartree-Fock method
-        # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
-
-        import sol
         # This is the solution for RHF from Junjie, uncomment this to run it.
         # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
+
+        # Implement your unrestricted Hartree-Fock algorithm here.
+        # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
 
         print(f"RHF energy: {ene_rhf: 12.8f}, Ref: {ene_rhf_ref: 12.8f}, Err: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
         assert abs(ene_rhf - ene_rhf_ref) < tol
@@ -145,18 +145,9 @@ def main(inp: str) -> None:
         raise RuntimeError("Invalid input.")
 
 if __name__ == "__main__":
-    mol = "h2"
-    bl   = 1.0
-    inp = f"h2-{bl:.4f}"
-    ene = main(inp)
-
+    # mol can be either h2, heh+ or h2o.
+    # r is the bond length in Angstrom.
     mol = "heh+"
-    bl   = 1.0
-    inp = f"{mol}-{bl:.4f}"
+    r   = 1.0
+    inp = f"{mol}-{r:.4f}"
     ene = main(inp)
-
-    mol = "h2o"
-    bl   = 1.0
-    inp = f"{mol}-{bl:.4f}"
-    ene = main(inp)
-
