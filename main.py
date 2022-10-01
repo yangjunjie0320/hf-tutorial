@@ -54,6 +54,8 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
 
     print("Great! We are ready to solve the Hartree-Fock equations...")
 
+    dm_init = None # Initialize the density matrix here.
+
     iter_scf     = 0
     is_converged = False
     is_max_iter  = False
@@ -65,7 +67,8 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
     ene_old = None
     ene_cur = None
 
-    dm_old    = None # Initial density matrix
+    assert dm_init is None
+    dm_old    = dm_init
     dm_cur    = None
 
     while not is_converged and not is_max_iter:
