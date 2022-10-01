@@ -44,7 +44,7 @@ and H2O
 ### Potential Energy Surface
 
 After implementing the SCF procedure, we can use it to compute the potential energy surface 
-of the H$_2$ molecule. We can do this by varying the internuclear distance and computing the
+of the $\mathrm{H}_2$ molecule. We can do this by varying the internuclear distance and computing the
 energy at each point.
 ```python
     for r in numpy.linspace(0.5, 2.5, 21):
@@ -55,9 +55,9 @@ energy at each point.
 You may also try other molecules, such as HeH+ and H2O.
 
 ### Unrestricted Hartree-Fock
-Write a new function `main_uhf` to implement the unrestricted Hartree-Fock method.
-See what's the difference between the restricted and unrestricted Hartree-Fock potential energy surfaces.
-
+Write a new function `solve_uhf` to implement the unrestricted Hartree-Fock method.
+See what's the difference between the restricted and unrestricted Hartree-Fock potential energy surfaces. (Note that to obtain a reasonable dissociation potential energy surface, you may need 
+to play some tricks to get the broken spin-symmetry UHF solution.)
 ### Dependencies
 - `numpy`
 - `scipy`
