@@ -52,7 +52,7 @@ energy at each point.
         e = main(inp)
         print(f"H2: r={r: 6.4f}, e={e: 12.8f}")
 ```
-You may also try other molecules, such as HeH+ and H2O.
+You may also try other molecules, such as $\mathrm{HeH}^+$ and $\mathrm{H_2O}$.
 
 ### Unrestricted Hartree-Fock
 Write a new function `solve_uhf` to implement the unrestricted Hartree-Fock method.
