@@ -44,6 +44,17 @@ def solve_rhf(number, h_core: numpy.ndarray, s_overlap: numpy.ndarray, energy_be
         exch_beta = - numpy.einsum("prqs,rs->pq", energy_between_elec, density_matrix_beta_old) 
         fock_alpha = h_core + coul + exch_alpha
         fock_beta  = h_core + coul + exch_beta
+
+        # For restricted hartree-fock, we can assume fock_alpha is
+        # identical to fock_beta.
+        # Think about how to change it to unrestricted hartree-fock.
+        fock_diff = numpy.linalg.norm(fock_alpha - fock_beta)
+        print(f"Fock matrix difference: {fock_diff: 6.4e}")
+        # If you use an initial guess to break alpha beta symmetry, you
+        # may found in some case the fock matrices are not identical,
+        # and the difference will be smaller or converge to some finite
+        # value.
+
         fock = fock_alpha
 
         # Diagonalize the Fock matrix
