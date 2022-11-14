@@ -123,5 +123,5 @@ def body(input:str) -> None:
 
 # bondlength = input()
 bl = 1.0
-input = f"H2O-{bl:.4f}"
+input = f"h2o-{bl:.4f}"
 ene = body(input)
