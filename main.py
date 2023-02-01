@@ -203,8 +203,8 @@ def main(inp: str) -> None:
             ene_cis_s_ref = numpy.load(f"{int_dir}/ene_cis_s.npy")
             ene_cis_t_ref = numpy.load(f"{int_dir}/ene_cis_t.npy")
 
-            # ene_cis_list, amp_cis_list = solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
-            ene_cis_list, amp_cis_list = sol.solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+            ene_cis_list, amp_cis_list = solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+            # ene_cis_list, amp_cis_list = sol.solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
 
             assert numpy.linalg.norm(ene_cis_list - ene_cis_s_ref) < tol
 
