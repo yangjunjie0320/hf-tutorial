@@ -121,11 +121,11 @@ def solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet: bool = True, triple
         for a in range(nvir):
             e_vir_minus_e_occ[a, i] = ene_vir[a] - ene_occ[i]
 
-    eri_mo  = numpy.einsum("mnkl,mp,nq,kr,ls->pqrs", eri_ao, coeff_ao_mo, coeff_ao_mo, coeff_ao_mo, coeff_ao_mo, optimize=True)
-    eri_ovvo = eri_mo[:nocc, nocc:, nocc:, :nocc]
+    eri_mo   = numpy.einsum("mnkl,mp,nq,kr,ls->pqrs", eri_ao, coeff_ao_mo, coeff_ao_mo, coeff_ao_mo, coeff_ao_mo, optimize=True)
+    eri_ovov = eri_mo[:nocc, nocc:, :nocc, nocc:]
     eri_oovv = eri_mo[:nocc, :nocc, nocc:, nocc:]
-    ham_cis  = numpy.einsum("iabj->iajb", eri_ovvo) * 2.0
-    ham_cis -= numpy.einsum("ijba->iajb", eri_oovv)
+    ham_cis  = eri_ovov * 2.0
+    ham_cis -= numpy.einsum("ijab->iajb", eri_oovv)
 
     ham_cis = ham_cis.reshape(nvir * nocc, nvir * nocc) + numpy.diag(e_vir_minus_e_occ.T.ravel())
     ene_cis_list, amp_cis_list = eigh(ham_cis)

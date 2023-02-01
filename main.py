@@ -130,6 +130,22 @@ def solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet: bool = True, triple
     nmo  = coeff_ao_mo.shape[1]
     nvir = nmo - nocc
 
+    # Step1: Calculate the fock matrix in the MO basis, i.e. the MO energies.
+    fock_mo = None
+
+    # Step2: Calculate the occupied and virtual energy gaps.
+    e_occ = None
+    e_vir = None
+    e_vir_minus_e_occ = None
+
+    # Step3: Transform the two-electron integrals to the MO basis, (pq|rs)
+    eri_mo = None
+
+    # Step4: Calculate the CIS Hamiltonian matrix, following the equation,
+    #        A_{ia,jb} = \delta_{ij} \delta_{ab} (e_a - e_i) + 2 (ia|bj) - (ij|ab)
+    cis_ham = None
+
+
     raise NotImplementedError
 
 def main(inp: str) -> None:
@@ -179,7 +195,7 @@ def main(inp: str) -> None:
         # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
 
         # Implement your CIS algorithm here.
-        if abs(ene_rhf_ref - ene_uhf_ref) < 1e-3:
+        if abs(ene_rhf_ref - ene_uhf_ref) < 1e-8:
             coeff_ao_mo = res_dict["coeff_ao_mo"]
             fock_ao     = res_dict["fock_ao"]
             eri_ao      = eri
@@ -187,8 +203,8 @@ def main(inp: str) -> None:
             ene_cis_s_ref = numpy.load(f"{int_dir}/ene_cis_s.npy")
             ene_cis_t_ref = numpy.load(f"{int_dir}/ene_cis_t.npy")
 
-            ene_cis_list, amp_cis_list = solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
-            # ene_cis_list, amp_cis_list = sol.solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+            # ene_cis_list, amp_cis_list = solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+            ene_cis_list, amp_cis_list = sol.solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
 
             assert numpy.linalg.norm(ene_cis_list - ene_cis_s_ref) < tol
 
