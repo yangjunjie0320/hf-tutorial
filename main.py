@@ -8,7 +8,8 @@ from scipy.linalg import eigh
 import sol
 
 def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
-              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
+              ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8, 
+              full_return: bool = False):
     """
     Solve the Hartree-Fock with SCF iterations.
     Reference: Szabo and Ostlund, 3.4.6. (p. 146, start from step 2)
@@ -41,6 +42,8 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
             The maximum number of SCF iterations.
         tol : float, optional
             The convergence tolerance, by default 1e-8.
+        full_return : bool, optional
+            Whether to return the full SCF results, by default False.
     """
 
     nelec_alph, nelec_beta = nelecs
@@ -84,6 +87,16 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
         is_max_iter  = iter_scf >= max_iter
         is_converged = ene_err < tol and dm_err < tol
 
+    # Store the results in a dictionary not neccessary, 
+    # but it is useful for implementing the CIS and other methods.
+
+    res_dict = {
+        "ene_rhf" :     ene_rhf,
+        "rdm1_ao" :     None,
+        "fock_ao" :     None,
+        "coeff_ao_mo" : None, 
+    }
+
     if is_converged:
         print(f"SCF converged in {iter_scf} iterations.")
     else:
@@ -92,10 +105,31 @@ def solve_rhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndar
         else:
             raise RuntimeError("SCF is not running, fill in the code in the main loop.")
 
-    return ene_rhf
+    if not full_return:
+        return ene_rhf
+
+    else:
+        return ene_rhf, res_dict
 
 def solve_uhf(nelecs, hcore: numpy.ndarray, ovlp: numpy.ndarray, eri: numpy.ndarray,
               ene_nuc :float = 0.0, max_iter :int = 100, tol: float = 1e-8) -> float:
+    raise NotImplementedError
+
+def solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet: bool = True, triplet: bool = False):
+    assert singlet or triplet
+    assert not (singlet and triplet)
+
+    if triplet:
+        raise NotImplementedError("Triplet CIS is not implemented.")
+
+    nocc_alph, nocc_beta = nelecs
+    assert nocc_alph == nocc_beta
+
+    nao  = fock_ao.shape[0]
+    nocc = nocc_alph
+    nmo  = coeff_ao_mo.shape[1]
+    nvir = nmo - nocc
+
     raise NotImplementedError
 
 def main(inp: str) -> None:
@@ -111,7 +145,7 @@ def main(inp: str) -> None:
     inp = inp.split('-')
     mol = inp[0]
 
-    tol = 1e-8
+    tol = 1e-6
     
     if len(inp) == 2:
         int_dir = f"./data/{mol}"
@@ -133,12 +167,30 @@ def main(inp: str) -> None:
         ene_fci_ref = numpy.load(f"{int_dir}/ene_fci.npy")
     
         # Implement your restricted Hartree-Fock algorithm here.
-        ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
+        # ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
+        # To get more information about the SCF, use the following line instead.
+        # ene_rhf, res_dict = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc, full_return=True)
+
         # This is the solution for RHF from Junjie, uncomment this to run it.
         # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
+        ene_rhf, res_dict = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc, full_return=True)
 
         # Implement your unrestricted Hartree-Fock algorithm here.
         # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
+
+        # Implement your CIS algorithm here.
+        if abs(ene_rhf_ref - ene_uhf_ref) < 1e-3:
+            coeff_ao_mo = res_dict["coeff_ao_mo"]
+            fock_ao     = res_dict["fock_ao"]
+            eri_ao      = eri
+
+            ene_cis_s_ref = numpy.load(f"{int_dir}/ene_cis_s.npy")
+            ene_cis_t_ref = numpy.load(f"{int_dir}/ene_cis_t.npy")
+
+            ene_cis_list, amp_cis_list = solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+            # ene_cis_list, amp_cis_list = sol.solve_cis(nelecs, fock_ao, eri_ao, coeff_ao_mo, singlet = True, triplet = False)
+
+            assert numpy.linalg.norm(ene_cis_list - ene_cis_s_ref) < tol
 
         print(f"RHF energy: {ene_rhf: 12.8f}, Ref: {ene_rhf_ref: 12.8f}, Err: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
         assert abs(ene_rhf - ene_rhf_ref) < tol
@@ -151,7 +203,7 @@ def main(inp: str) -> None:
 if __name__ == "__main__":
     # mol can be either h2, heh+ or h2o.
     # r is the bond length in Angstrom.
-    mol = "heh+"
+    mol = "h2o"
     r   = 1.0
     inp = f"{mol}-{r:.4f}"
     ene = main(inp)

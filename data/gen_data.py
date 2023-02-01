@@ -2,7 +2,7 @@ import os
 import numpy
 import pyscf
 from pyscf import gto
-from pyscf import scf, fci
+from pyscf import scf, fci, tdscf
 
 def gen_data(inp, dm_rhf):
     inp = inp.split('-')
@@ -130,6 +130,20 @@ def gen_data(inp, dm_rhf):
     if uhf_obj.converged:
         ene_uhf = uhf_obj.e_tot
         numpy.save(f"{int_dir}/ene_uhf.npy", ene_uhf)
+
+    if abs(ene_uhf - ene_rhf) < 1e-3:
+        cis_obj = tdscf.TDA(rhf_obj)
+        cis_obj.nstates = 20
+        cis_obj.singlet = True
+        cis_obj.triplet = False
+        e_cis, x_cis = cis_obj.kernel()
+        numpy.save(f"{int_dir}/ene_cis_s.npy", e_cis)
+
+        cis_obj.nstates = 20
+        cis_obj.singlet = False
+        cis_obj.triplet = True
+        e_cis, x_cis = cis_obj.kernel()
+        numpy.save(f"{int_dir}/ene_cis_t.npy", e_cis)
 
     nelecs = mol.nelec
     e_nuc  = rhf_obj.energy_nuc()
