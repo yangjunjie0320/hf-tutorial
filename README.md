@@ -46,6 +46,7 @@ There is a loose style check with `ruff`, you can run it with:
 ```bash
 ruff check .
 ```
+Follow the suggestions to fix the style issues if you want.
 
 ## The SCF Algorithm
 
