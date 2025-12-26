@@ -52,19 +52,19 @@ Follow the suggestions to fix the style issues if you want.
 
 We will follow the algorithm described in Szabo and Ostlund, Section 3.4.6 (p. 146) to implement the Hartree-Fock method. The SCF procedure consists of the following steps.
 
-<!-- > **Note**: github could not render `\bm` correctly, you can use `\bm` instead. -->
+> **Note**: github could not render `\mathrm` correctly, check the raw markdown file.
 
 ### Step 1: Initial Guess
 
-Obtain an initial guess of the density matrix ${\bm{P}}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\bm{P} = \bm{P}^0$.
+Obtain an initial guess of the density matrix ${\mathrm{P}}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\mathrm{P} = \mathrm{P}^0$.
 
-$$ \bm{H}_{\mathrm{core}} \bm{C}_{0} = \bm{S} \bm{C}_{0} \epsilon 
+$$ \mathrm{H}_{\mathrm{core}} \mathrm{C}_{0} = \mathrm{S} \mathrm{C}_{0} \epsilon 
 \quad \text{then} \quad
 P^0_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C^0_{\mu i} C^0_{\nu i} $$
 
 ### Step 2: Build Coulomb and Exchange Matrices
 
-Calculate the Coulomb $\bm{J}$ and exchange $\bm{K}$ matrices from the density matrix $\bm{P}$ and the two-electron repulsion integrals:
+Calculate the Coulomb $\mathrm{J}$ and exchange $\mathrm{K}$ matrices from the density matrix $\mathrm{P}$ and the two-electron repulsion integrals:
 
 $$
 J_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \nu | \lambda \sigma \right)
@@ -76,19 +76,19 @@ $$
 
 Add the Coulomb and exchange matrices to the core Hamiltonian to obtain the Fock matrix:
 
-$$ \bm{F} = \bm{H}_{\mathrm{core}} + \bm{J} - \frac{1}{2} \bm{K} $$
+$$ \mathrm{F} = \mathrm{H}_{\mathrm{core}} + \mathrm{J} - \frac{1}{2} \mathrm{K} $$
 
 ### Step 4: Diagonalize and Update Density Matrix
 
 Diagonalize the Fock matrix using [`eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
 
-$$ \bm{F} \bm{C} = \bm{S} \bm{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
+$$ \mathrm{F} \mathrm{C} = \mathrm{S} \mathrm{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
 
 ### Step 5: Compute the Energy
 
 Compute the energy from the density matrix and Fock matrix:
 
-$$ E = E_\mathrm{nuc} + \frac{1}{2} \mathrm{tr} \left( \bm{P} \bm{F} + \bm{P} \bm{H}_{\mathrm{core}} \right) $$
+$$ E = E_\mathrm{nuc} + \frac{1}{2} \mathrm{tr} \left( \mathrm{P} \mathrm{F} + \mathrm{P} \mathrm{H}_{\mathrm{core}} \right) $$
 
 ### Step 6: Check Convergence
 
