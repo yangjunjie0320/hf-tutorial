@@ -1,4 +1,5 @@
 # Hartree-Fock Tutorial
+[![CI](https://github.com/yangjunjie0320/hf-tutorial/actions/workflows/ci.yml/badge.svg)](https://github.com/yangjunjie0320/hf-tutorial/actions/workflows/ci.yml)
 
 This tutorial demonstrates how to implement a simple program to solve the Hartree-Fock equations using self-consistent field (SCF) iterations.
 
