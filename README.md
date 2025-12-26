@@ -52,19 +52,23 @@ Follow the suggestions to fix the style issues if you want.
 
 We will follow the algorithm described in Szabo and Ostlund, Section 3.4.6 (p. 146) to implement the Hartree-Fock method. The SCF procedure consists of the following steps.
 
-> **Note**: github could not render `\mathrm` correctly, check the raw markdown file.
+> **Note**: github could not render `\mathbf` correctly, check the raw markdown file.
 
 ### Step 1: Initial Guess
 
-Obtain an initial guess of the density matrix ${\mathrm{P}}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\mathrm{P} = \mathrm{P}^0$.
+Obtain an initial guess of the Fock matrix using the core Hamiltonian (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\mathbf{F} = \mathbf{H}_{\text{core}}$.
 
-$$ \mathrm{H}_{\mathrm{core}} \mathrm{C}_{0} = \mathrm{S} \mathrm{C}_{0} \epsilon 
-\quad \text{then} \quad
-P^0_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C^0_{\mu i} C^0_{\nu i} $$
+### Step 2: Diagonalize the Fock Matrix
 
-### Step 2: Build Coulomb and Exchange Matrices
+Solve the generalized eigenvalue problem with [`scipy.linalg.eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
 
-Calculate the Coulomb $\mathrm{J}$ and exchange $\mathrm{K}$ matrices from the density matrix $\mathrm{P}$ and the two-electron repulsion integrals:
+$$ \mathbf{F} \mathbf{C} = \mathbf{S} \mathbf{C} \epsilon \quad \text{and} \quad 
+\mathbf{C}_{\text{occ}} \leftarrow \mathbf{C} \quad \text{then} \quad
+P_{\mu \nu} = 2 \sum_{i \in \text{occ}} C_{\mu i} C_{\nu i} $$
+
+### Step 3: Build Coulomb and Exchange Matrices
+
+Calculate the Coulomb $\mathbf{J}$ and exchange $\mathbf{K}$ matrices from the density matrix $\mathbf{P}$ and the two-electron repulsion integrals:
 
 $$
 J_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \nu | \lambda \sigma \right)
@@ -72,29 +76,26 @@ J_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \nu | \lambda 
 K_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \sigma | \lambda \nu \right)
 $$
 
-### Step 3: Build the Fock Matrix
+### Step 4: Build the Fock Matrix
 
 Add the Coulomb and exchange matrices to the core Hamiltonian to obtain the Fock matrix:
 
-$$ \mathrm{F} = \mathrm{H}_{\mathrm{core}} + \mathrm{J} - \frac{1}{2} \mathrm{K} $$
-
-### Step 4: Diagonalize and Update Density Matrix
-
-Solve the generalized eigenvalue problem with [`scipy.linalg.eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
-
-$$ \mathrm{F} \mathrm{C} = \mathrm{S} \mathrm{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
+$$ \mathbf{F} = \mathbf{H}_{\text{core}} + \mathbf{J} - \frac{1}{2} \mathbf{K} $$
 
 ### Step 5: Compute the Energy
 
 Compute the energy from the density matrix and Fock matrix:
 
-$$ E = E_\mathrm{nuc} + \frac{1}{2} \mathrm{tr} \left( \mathrm{P} \mathrm{F} + \mathrm{P} \mathrm{H}_{\mathrm{core}} \right) $$
+$$ E = E_{\text{nuc}} + \frac{1}{2} \text{tr} \left( \mathbf{P} \mathbf{F} + \mathbf{P} \mathbf{H}_{\text{core}} \right) $$
 
 ### Step 6: Check Convergence
 
 Compute the errors and check for convergence:
 - **If converged**: Finish the calculation and return the energy and density matrix.
 - **If not converged**: Return to Step 2 with the new density matrix.
+
+There might be some cases that SCF is hard to converge, you can try to use [DIIS](https://vergil.chemistry.gatech.edu/static/content/diis.pdf) 
+to accelerate the convergence.
 
 ## Code Framework
 
@@ -107,7 +108,7 @@ This project provides a simple framework for implementing the SCF procedure. The
 
 - **`sol.py`**: Reference implementation of the RHF method. Check it if you are stuck.
 
-- **`data/gen_data.py`**: Script to generate the one-electron and two-electron integrals for molecules (e.g., $\mathrm{H}_2$, $\mathrm{HeH}^+$, $\mathrm{H}_2\mathrm{O}$) using PySCF.
+- **`data/gen_data.py`**: Script to generate the one-electron and two-electron integrals for molecules (e.g., $\text{H}_2$, $\text{HeH}^+$, $\text{H}_2\text{O}$) using PySCF.
 
 - **`data/plot.ipynb`**: Jupyter notebook to visualize the potential energy surface by plotting energy vs. internuclear distance. Use as a reference to plot your own results.
 
@@ -115,7 +116,7 @@ This project provides a simple framework for implementing the SCF procedure. The
 
 ## Potential Energy Surface
 
-After implementing the self-consistent field (SCF) procedure, you can use it to compute the potential energy surface of molecules. For example, to compute the potential energy surface of the $\mathrm{H}_2$ molecule, vary the internuclear distance and compute the energy at each point:
+After implementing the self-consistent field (SCF) procedure, you can use it to compute the potential energy surface of molecules. For example, to compute the potential energy surface of the $\text{H}_2$ molecule, vary the internuclear distance and compute the energy at each point:
 
 ```python
 for r in numpy.linspace(0.5, 3.0, 61):
@@ -124,7 +125,7 @@ for r in numpy.linspace(0.5, 3.0, 61):
     print(f"H2: r={r: 6.4f}, e={e: 12.8f}")
 ```
 
-You can also try other molecules, such as $\mathrm{HeH}^+$ and $\mathrm{H_2O}$.
+You can also try other molecules, such as $\text{HeH}^+$ and $\text{H}_2\text{O}$.
 
 To visualize the potential energy surface, you can use the `matplotlib` package. An example of how to plot the data can be found in `./data/plot.ipynb`.
 
