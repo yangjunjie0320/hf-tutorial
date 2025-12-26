@@ -1,152 +1,213 @@
-### Introduction
-This is a tutorial on how to implement a simple program
-to solve the Hartree-Fock with SCF iterations.
+# Hartree-Fock Tutorial
 
-### Impement the SCF procedure
-We will be following the algorithm described in Szabo and Ostlund, 3.4.6, p. 146 to implement the Hartree-Fock method for the hydrogen molecule. The steps are as follows:
+This tutorial demonstrates how to implement a simple program to solve the Hartree-Fock equations using self-consistent field (SCF) iterations.
 
-1. Obtain a guess at the density matrix.
+## Setup and Dependencies
 
-$$ H_{core} C_{guess} = S C_{guess} \epsilon $$
+Begin by cloning the repository:
 
-$$ P_{\lambda \sigma} = 2 \sum_{ij}^{occ} C_{\lambda i} C_{\sigma j} $$
-
-2. Calculate the exchange and coulomb matrices from the density matrix and the two-electron repulsion integrals.
-
-$$
-\begin{aligned}
-G_{\mu \nu} &= 2J_{\mu \nu} - K_{\mu \nu} \\
-&= \sum_{\lambda \sigma} P_{\lambda \sigma} \left( 2 (\mu \nu | \lambda \sigma) - (\mu \sigma | \lambda \nu) \right)
-\end{aligned}
-$$
-
-3. Add exchange and coulomb matrices to the core-Hamiltonian to obtain the Fock matrix.
-
-$$ F = H_{core} + G $$
-
-4. Diagonalize the Fock matrix.(use [eigh](https://docs.scipy.org/doc/scipy//reference/generated/scipy.linalg.eig.html))
-
-$$ F C = S C \epsilon $$
-
-5. Select the occupied orbitals and calculate the new density matrix.
-
-$$ P_{\lambda \sigma} = 2 \sum_{ij}^{occ} C_{\lambda i} C_{\sigma j} $$
-
-6. Compute the energy.
-
-$$
-\begin{aligned}
-&E = V_\mathrm{nuc} + E_\mathrm{e}  \\
-&V_\mathrm{nuc} = \sum_{i &lt; j}^{N} \frac{Z_{i} Z_{j}}{R_{ij}}  \\
-&E_e = \frac{1}{2} tr \left[ P (F + H_{core}) \right]
-\end{aligned}
-$$
-
-
-7.  Compute the errors and check for convergence.
-  - If converged, return the energy.
-  - If not converged, return to the second step with the new density matrix.
-
-To start, you can implement this algorithm for the hydrogen molecule by running the following code:
-
-```python
-    mol = "h2"
-    r   = 1.0
-    inp = f"{mol}-{r:.4f}"
-    e = main(inp) # H2 molecule with bond length 1.0
-```
-then try some more complicated molecules, such as HeH+
-```python
-    mol = "heh+"
-    r   = 1.0
-    inp = f"{mol}-{r:.4f}"
-    e = main(inp) # HeH+ molecule with bond length 1.0
-```
-and H2O
-
-```python
-    mol = "h2o"
-    r   = 1.0
-    inp = f"{mol}-{r:.4f}"
-    e = main(inp) # water molecule with bond length 1.0
+```bash
+git clone https://github.com/yangjunjie0320/hf-tutorial.git
+cd hf-tutorial
 ```
 
-### Potential Energy Surface
+Install the required dependencies using `pip`:
 
-After implementing the self-consistent field (SCF) procedure, we can use it to compute the potential energy surface of the $\mathrm{H}_2$ molecule. We can do this by varying the internuclear distance and computing the energy at each point.
+```bash
+pip install -r requirements.txt
+```
+
+The core dependencies are:
+- `numpy`
+- `scipy`
+- `h5py`
+- `line_profiler` (for profiling)
+
+> **Note**: If you wish to use `./data/gen_data.py` to generate the integrals, `pyscf` is also required.
+
+You can verify the setup by running `main.py`:
+
+```bash
+python main.py
+```
+
+You should see:
+```
+RuntimeError: SCF is not running, fill in the code in the main loop.
+```
+
+This confirms that the framework is set up correctly and ready for you to implement the SCF procedure.
+
+## The SCF Algorithm
+
+We will follow the algorithm described in Szabo and Ostlund, Section 3.4.6 (p. 146) to implement the Hartree-Fock method. The SCF procedure consists of the following steps:
+
+### Step 1: Initial Guess
+
+Obtain an initial guess of the density matrix $\mathbf{P}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\mathbf{P} = \mathbf{P}^0$.
+
+$$ \mathbf{H}_{\mathrm{core}} \mathbf{C}_{0} = \mathbf{S} \mathbf{C}_{0} \epsilon 
+\quad \text{then} \quad
+P^0_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C^0_{\mu i} C^0_{\nu i} $$
+
+### Step 2: Build Coulomb and Exchange Matrices
+
+Calculate the Coulomb $\mathbf{J}$ and exchange $\mathbf{K}$ matrices from the density matrix $\mathbf{P}$ and the two-electron repulsion integrals:
+
+$$
+J_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \nu | \lambda \sigma \right)
+\quad \text{and} \quad
+K_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} \left( \mu \sigma | \lambda \nu \right)
+$$
+
+### Step 3: Build the Fock Matrix
+
+Add the Coulomb and exchange matrices to the core Hamiltonian to obtain the Fock matrix:
+
+$$ \mathbf{F} = \mathbf{H}_{\mathrm{core}} + \mathbf{J} - \frac{1}{2} \mathbf{K} $$
+
+### Step 4: Diagonalize and Update Density Matrix
+
+Diagonalize the Fock matrix using [`eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
+
+$$ \mathbf{F} \mathbf{C} = \mathbf{S} \mathbf{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
+
+### Step 5: Compute the Energy
+
+Compute the energy from the density matrix and Fock matrix:
+
+$$ E = E_\mathrm{nuc} + \frac{1}{2} \mathrm{tr} \left( \mathbf{P} \mathbf{F} + \mathbf{P} \mathbf{H}_{\mathrm{core}} \right) $$
+
+### Step 6: Check Convergence
+
+Compute the errors and check for convergence:
+- **If converged**: Finish the calculation and return the energy and density matrix.
+- **If not converged**: Return to Step 2 with the new density matrix.
+
+## Code Framework
+
+This project provides a simple framework for implementing the SCF procedure. The code is organized as follows:
+
+- **`main.py`**: The main entry point of the program. Contains the framework for implementing the SCF procedure:
+  - `solve_rhf()`: Template function for implementing the restricted Hartree-Fock (RHF) method
+  - `solve_uhf()`: Template function for implementing the unrestricted Hartree-Fock (UHF) method
+  - `main()`: Loads molecular integrals and runs the SCF calculation
+
+- **`sol.py`**: Reference implementation of the RHF method. Check it if you are stuck.
+
+- **`data/gen_data.py`**: Script to generate the one-electron and two-electron integrals for molecules (e.g., $\mathrm{H}_2$, $\mathrm{HeH}^+$, $\mathrm{H}_2\mathrm{O}$) using PySCF.
+
+- **`data/plot.ipynb`**: Jupyter notebook to visualize the potential energy surface by plotting energy vs. internuclear distance. Use as a reference to plot your own results.
+
+- **`test/test_rhf.py`**: Test script to verify the correctness of your SCF implementation by comparing against reference energies.
+
+## Potential Energy Surface
+
+After implementing the self-consistent field (SCF) procedure, you can use it to compute the potential energy surface of molecules. For example, to compute the potential energy surface of the $\mathrm{H}_2$ molecule, vary the internuclear distance and compute the energy at each point:
+
 ```python
-    for r in numpy.linspace(0.5, 3.0, 61):
-        inp = f"h2-{r:.4f}"
-        e = main(inp)
-        print(f"H2: r={r: 6.4f}, e={e: 12.8f}")
+for r in numpy.linspace(0.5, 3.0, 61):
+    inp = f"h2-{r:.4f}"
+    e = main(inp)
+    print(f"H2: r={r: 6.4f}, e={e: 12.8f}")
 ```
 
 You can also try other molecules, such as $\mathrm{HeH}^+$ and $\mathrm{H_2O}$.
-To visualize the potential energy surface, you can use the `matplotlib` package. 
-An example of how to plot the data can be found in the file ./data/plot.ipynb.
 
-### Unrestricted Hartree-Fock
-The unrestricted Hartree-Fock (UHF) method can be used to study molecules that have broken spin-symmetry, such as those that have a non-zero magnetic moment or unpaired electrons. In this case, the potential energy surface can be different from that obtained from the restricted Hartree-Fock method. 
+To visualize the potential energy surface, you can use the `matplotlib` package. An example of how to plot the data can be found in `./data/plot.ipynb`.
 
-To implement the UHF method, we will create a new function `solve_uhf` that follows the same steps as the restricted Hartree-Fock method, but with the added flexibility of allowing different spin-orbitals to have different occupation numbers. 
+## Unrestricted Hartree-Fock
 
-There have something different between RHF and UHF. In UHF method, you need to solve two generalized eigenvalue problems:
+The unrestricted Hartree-Fock (UHF) method can be used to study molecules with broken spin-symmetry, such as those with a non-zero magnetic moment or unpaired electrons. In this case, the potential energy surface can be different from that obtained using the restricted Hartree-Fock method.
 
-$$
-\begin{cases}
-  F^{\alpha} C^{\alpha} = S C^{\alpha} \epsilon^{\alpha}  \\
-  F^{\beta} C^{\beta} = S C^{\beta} \epsilon^{\beta}  \\
-\end{cases}
-$$
+To implement the UHF method, create a new function `solve_uhf` that follows the same steps as the restricted Hartree-Fock method, but with the added flexibility of allowing different spin-orbitals to have different occupation numbers.
 
-And the exchange and coulomb matrices become to
+> **Important**: Even if you have implemented the UHF method, the results may not be consistent with the reference. To obtain the correct dissociation potential energy surface, you may need to carefully break the spin symmetry with a smart initial guess.
 
-$$
-\begin{cases}
-G^{\alpha}_{\mu \nu} = \sum_{\lambda \sigma} \left[ P_{\lambda \sigma}^{t} (\mu \nu | \lambda \sigma) - P_{\lambda \sigma}^{\alpha} (\mu \sigma | \lambda \nu) \right]  \\
-G^{\beta}_{\mu \nu} = \sum_{\lambda \sigma} \left[ P_{\lambda \sigma}^{t} (\mu \nu | \lambda \sigma) - P_{\lambda \sigma}^{\beta} (\mu \sigma | \lambda \nu) \right]  \\
-P^{t} = P^{\alpha} + P^{\beta}
-\end{cases}
-$$
+## Performance Tips
 
-The Fock matrix building is the same as RHF, just add $G^{\alpha}$ and $G^{\beta}$ to $H_{core}$.
+Calculating the Coulomb and exchange matrices is the most time-consuming part of the SCF procedure (not only in this tutorial, but also in real-world applications).
 
-If you use the one-electron matrix guess to calculate molecules that all electrons are paired, such as hydrogen, water, methane, etc. You will find that $P^{\alpha}$ is equal to $P^{\beta}$. Therefore, we need to break the symmetry between the alpha orbital and the beta orbital.
+### Getting Started
 
-The simplest method is to mix the HOMO and the LUMO use this formula if they are orthonormal
-
-$$
-\begin{cases}
-\psi_{homo}^{\alpha} = -\psi_{lumo}^{\beta} = \frac{1}{\sqrt{2}} \left( \psi_{homo} + \psi_{lumo} \right) \\
-\psi_{lumo}^{\alpha} = -\psi_{homo}^{\beta} = \frac{1}{\sqrt{2}} \left( \psi_{lumo} - \psi_{homo} \right) \\
-\end{cases}
-$$
-
-It's important to note that even if you have implemented the UHF method, the results may not be consistent with the reference. In order to get the correct dissociation potential energy surface, you may need to carefully break the spin symmetry.
-
-### Tips
-
-When you first multiply two matrices, you maybe calculate it in a loop. But in numpy, you can improve it with [einsum](https://numpy.org/doc/stable/reference/generated/numpy.einsum.html). Such as an n-col k-row matrix A times a k-col m-row matrix B got an n-col m-row matrix C can be written like
+You can start with `numpy.einsum` (setting `optimize=True` might help). It offers an intuitive way to express the contraction of two tensors, though it may not always be the most efficient approach in terms of performance.
 
 ```python
-    numpy.eninsum("nk, km -> nm", A, B, C)
+# einsum notation will contract the repeated indices automatically
+# J_{\mu \nu} = \sum_{\lambda \sigma} P_{\lambda \sigma} (\mu \nu | \lambda \sigma)
+# p ~ mu, q ~ nu, r ~ lambda, s ~ sigma
+coul = numpy.einsum("pqrs,rs->pq", eri, dm, optimize=True)
+exch = -numpy.einsum("prqs,rs->pq", eri, dm, optimize=True) / 2.0
 ```
 
-It means
+The equivalent Python loop is:
+```python
+nao = dm.shape[0]
+coul = numpy.zeros((nao, nao))
+for mu in range(nao):
+    for nu in range(nao):
+        for lm in range(nao):
+            for sg in range(nao):
+                coul[mu, nu] += eri[mu, nu, lm, sg] * dm[lm, sg]
+```
 
-$$
-\begin{aligned}
-A B &= C  \\
-\{ a_{nk} \} \{ b_{km} \} &= \{ c_{nm} \}  \\
-\end{aligned}
-$$
+### Advanced Optimization
 
-### Dependencies
-- `numpy`
-- `scipy`
-- If you wish to use `./data/gen_data.py` to generate the integrals, `pyscf` is also required.
+#### Modularize the Code
 
-### Reference
-- Szabo and Ostlund, _Modern Quantum Chemistry: Introduction to Advanced Electronic Structure Theory_,
-  Dover Publications, New York, 1996
+Begin by moving the matrix computation to standalone functions:
+```python
+def compute_coulomb_matrix_v0(eri, dm):
+    nao = dm.shape[0]
+    coul = numpy.zeros((nao, nao))
+    for mu in range(nao):
+        for nu in range(nao):
+            for lm in range(nao):
+                for sg in range(nao):
+                    coul[mu, nu] += eri[mu, nu, lm, sg] * dm[lm, sg]
+    return coul
+
+def compute_coulomb_matrix_v1(eri, dm):
+    nao = dm.shape[0]
+    coul = numpy.einsum("pqrs,rs->pq", eri, dm, optimize=True)
+    return coul
+```
+These functions can be tested and benchmarked separately, making optimization easier.
+You will see that the nested loop is much slower than the `einsum` version. If you are ambitious, try implementing it with a Python loop first to understand the algorithm (for both Coulomb and exchange matrices).
+
+Then use a profiler like `line_profiler` to identify the bottlenecks:
+```bash
+kernprof -l -v main.py
+```
+
+#### Optimize with Matrix Operations
+
+Try converting the `einsum` to more efficient matrix operations using `numpy.dot` or `numpy.tensordot`:
+```python
+def compute_coulomb_matrix_v2(eri, dm):
+    """Alternative implementation using reshape and dot"""
+    nao = dm.shape[0]
+    eri_2d = eri.reshape(nao * nao, nao * nao)
+    dm_1d = dm.reshape(nao * nao)
+    coul_1d = numpy.dot(eri_2d, dm_1d)
+    return coul_1d.reshape(nao, nao)
+```
+
+> **Note**: The reshape approach may not always be faster than `einsum` with `optimize=True`, as `einsum` uses optimized BLAS routines internally. Benchmark to compare!
+
+#### Use Advanced Optimization Tools
+
+For production code or when dealing with large systems, consider using powerful optimization tools:
+
+- **`numba`**: Just-in-time (JIT) compilation for Python code. Simply add decorators to your functions for significant speedups with minimal code changes.
+
+- **`cython`**: Compile Python extensions to C for better performance. Requires writing Cython code but offers fine-grained control over optimization.
+
+- **`C/C++`**: Native kernel functions for maximum control and performance. Use OpenMP (e.g., `#pragma omp parallel for`) for easy parallelization across CPU cores.
+
+- **`CUDA`**: GPU kernel functions for massive parallelization.
+
+## References
+
+- Szabo and Ostlund, _Modern Quantum Chemistry: Introduction to Advanced Electronic Structure Theory_, Dover Publications, New York, 1996
 - Helgaker, Jørgensen, and Olsen, _Molecular Electronic-Structure Theory_, Wiley, New York, 2000

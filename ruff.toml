@@ -1,0 +1,60 @@
+# Ruff configuration for Hartree-Fock tutorial project
+
+# Basic settings
+line-length = 120  # Matches original .flake8 max-line-length
+indent-width = 4
+target-version = "py39"  # Target Python version (matches CI configuration)
+
+# Excluded files/directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg",
+    ".eggs",
+    "test",      # Test directory
+    "data",      # Data directory with generated files
+]
+
+[lint]
+# Enabled rule sets
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort (import sorting)
+    "UP",     # pyupgrade (modernize syntax)
+    "B",      # flake8-bugbear (common bugs)
+    "SIM",    # flake8-simplify
+    "RUF",    # ruff-specific rules
+]
+
+# Ignored rules
+# Note: Many formatting-related rules are ignored as they're handled by the formatter
+ignore = [
+    "E501",   # Line length (handled by formatter)
+    "E203",   # Whitespace before ':' (conflicts with Black-style formatting)
+    "E402",   # Module level import not at top of file (common in scripts)
+    "E731",   # Do not assign a lambda expression (sometimes useful in scientific code)
+    "E401",   # Multiple imports on one line (acceptable for related imports)
+    "UP031",  # Use format specifiers instead of percent format (allow both styles)
+]
+
+# Rules eligible for auto-fix
+fixable = ["ALL"]
+
+[lint.isort]
+# Import sorting configuration
+known-first-party = []  # No first-party packages in this tutorial project
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"test/*" = ["S101", "F401"]  # Allow assert and unused imports in tests
+"data/*" = ["F401", "E402"]  # Allow unused imports and module-level imports in data scripts
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
