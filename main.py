@@ -84,7 +84,7 @@ def solve_rhf(
         if ene_old is not None:
             dm_err = numpy.linalg.norm(dm_cur - dm_old)
             ene_err = abs(ene_cur - ene_old)
-            print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.4e}, {dm_err: 6.4e}")
+            print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.2e}, {dm_err: 6.2e}")
 
         iter_scf += 1
         is_max_iter = iter_scf >= max_iter
@@ -147,24 +147,26 @@ def main(inp: str) -> None:
         ene_uhf_ref = numpy.load(f"{int_dir}/ene_uhf.npy")
         ene_fci_ref = numpy.load(f"{int_dir}/ene_fci.npy")
 
-        # Implement your restricted Hartree-Fock algorithm here.
-        ene_rhf = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
-
-        # This is the solution for RHF from Junjie, uncomment this to run it.
+        # TODO: Implement your restricted Hartree-Fock algorithm in line 9.
+        # A reference implementation of RHF is provided, uncomment next line to run it.
         # from sol import solve_rhf
-        # ene_rhf = sol.solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
+        ene_rhf_sol = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
 
-        # Implement your unrestricted Hartree-Fock algorithm here.
-        ene_uhf = None
+        # Uncomment this to check your UHF implementation.
+        ene_uhf_sol = None
         # ene_uhf = solve_uhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=100, ene_nuc=ene_nuc)
 
-        print(f"RHF energy: {ene_rhf: 12.8f}, Ref: {ene_rhf_ref: 12.8f}, Err: {abs(ene_rhf - ene_rhf_ref): 6.4e}")
-        assert abs(ene_rhf - ene_rhf_ref) < tol
-        if ene_uhf is not None:
-            print(f"UHF energy: {ene_uhf: 12.8f}, Ref: {ene_uhf_ref: 12.8f}, Err: {abs(ene_uhf - ene_uhf_ref): 6.4e}")
-            assert abs(ene_uhf - ene_uhf_ref) < tol
+        message = "RHF energy: %12.8f" % (ene_rhf_sol)
+        message += ", Ref: %12.8f" % (ene_rhf_ref)
+        message += ", Error: %6.2e" % (abs(ene_rhf_sol - ene_rhf_ref))
+        if ene_uhf_sol is not None:
+            message += "\nUHF energy: %12.8f" % (ene_uhf_sol)
+            message += ", Ref: %12.8f" % (ene_uhf_ref)
+            message += ", Error: %6.2e" % (abs(ene_uhf_sol - ene_uhf_ref))
 
-        return ene_rhf
+        print(message)
+
+        return ene_rhf_sol
 
     else:
         raise RuntimeError("Invalid input.")

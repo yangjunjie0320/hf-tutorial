@@ -32,11 +32,14 @@ python main.py
 ```
 
 You should see:
-```
+```bash
+Great! We are ready to solve the Hartree-Fock equations...
+...
 RuntimeError: SCF is not running, fill in the code in the main loop.
 ```
 
 This confirms that the framework is set up correctly and ready for you to implement the SCF procedure.
+Find the function that raises the `RuntimeError` and implement the SCF procedure in it.
 
 ## The SCF Algorithm
 

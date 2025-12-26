@@ -68,7 +68,7 @@ def solve_rhf(
         if ene_old is not None:
             dm_err = numpy.linalg.norm(dm_cur - dm_old)
             ene_err = abs(ene_cur - ene_old)
-            print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.4e}, {dm_err: 6.4e}")
+            print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.2e}, {dm_err: 6.2e}")
 
         dm_old = dm_cur
         ene_old = ene_cur
