@@ -56,7 +56,7 @@ We will follow the algorithm described in Szabo and Ostlund, Section 3.4.6 (p. 1
 
 ### Step 1: Initial Guess
 
-Obtain an initial guess of the density matrix $\bm{P}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\bm{P} = \bm{P}^0$.
+Obtain an initial guess of the density matrix ${\bm{P}}^0$ from the core Hamiltonian and the overlap matrix (this is called the "1e guess" in some software; you can use a smarter guess if desired). Set $\bm{P} = \bm{P}^0$.
 
 $$ \bm{H}_{\mathrm{core}} \bm{C}_{0} = \bm{S} \bm{C}_{0} \epsilon 
 \quad \text{then} \quad
