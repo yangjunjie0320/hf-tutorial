@@ -80,7 +80,7 @@ $$ \mathrm{F} = \mathrm{H}_{\mathrm{core}} + \mathrm{J} - \frac{1}{2} \mathrm{K}
 
 ### Step 4: Diagonalize and Update Density Matrix
 
-Diagonalize the Fock matrix using [`scipy.linalg.eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
+Solve the generalized eigenvalue problem with [`scipy.linalg.eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
 
 $$ \mathrm{F} \mathrm{C} = \mathrm{S} \mathrm{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
 
