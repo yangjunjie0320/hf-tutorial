@@ -40,6 +40,9 @@ ignore = [
     "E731",   # Do not assign a lambda expression (sometimes useful in scientific code)
     "E401",   # Multiple imports on one line (acceptable for related imports)
     "UP031",  # Use format specifiers instead of percent format (allow both styles)
+    "F401",   # Allow unused imports
+    "RUF059",
+    "F841",
 ]
 
 # Rules eligible for auto-fix

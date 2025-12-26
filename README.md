@@ -42,6 +42,11 @@ RuntimeError: SCF is not running, fill in the code in the main loop.
 This confirms that the framework is set up correctly and ready for you to implement the SCF procedure.
 Find the function that raises the `RuntimeError` and implement the SCF procedure in it.
 
+There is a loose style check with `ruff`, you can run it with:
+```bash
+ruff check .
+```
+
 ## The SCF Algorithm
 
 We will follow the algorithm described in Szabo and Ostlund, Section 3.4.6 (p. 146) to implement the Hartree-Fock method. The SCF procedure consists of the following steps:

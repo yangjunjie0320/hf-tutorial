@@ -2,3 +2,4 @@ numpy
 scipy
 h5py
 line_profiler
+ruff

@@ -1,8 +1,7 @@
-import os, typing
+import os
+
 import numpy
 import scipy
-
-# Use eigh to diagonalize matrices
 from scipy.linalg import eigh
 
 
