@@ -80,7 +80,7 @@ $$ \mathrm{F} = \mathrm{H}_{\mathrm{core}} + \mathrm{J} - \frac{1}{2} \mathrm{K}
 
 ### Step 4: Diagonalize and Update Density Matrix
 
-Diagonalize the Fock matrix using [`eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
+Diagonalize the Fock matrix using [`scipy.linalg.eigh`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html), then select the occupied orbitals and calculate the new density matrix:
 
 $$ \mathrm{F} \mathrm{C} = \mathrm{S} \mathrm{C} \epsilon \quad \text{then} \quad P_{\mu \nu} = 2 \sum_{i \in \mathrm{occ}} C_{\mu i} C_{\nu i} $$
 
@@ -142,7 +142,7 @@ Calculating the Coulomb and exchange matrices is the most time-consuming part of
 
 ### Getting Started
 
-You can start with `numpy.einsum` (setting `optimize=True` might help). It offers an intuitive way to express the contraction of two tensors, though it may not always be the most efficient approach in terms of performance.
+You can start with [`numpy.einsum`](https://numpy.org/doc/stable/reference/generated/numpy.einsum.html) (setting `optimize=True` might help). It offers an intuitive way to express the contraction of two tensors, though it may not always be the most efficient approach in terms of performance.
 
 ```python
 # einsum notation will contract the repeated indices automatically
