@@ -163,9 +163,7 @@ for mu in range(nao):
                 coul[mu, nu] += eri[mu, nu, lm, sg] * dm[lm, sg]
 ```
 
-### Advanced Optimization
-
-#### Modularize the Code
+### Modularize the Code
 
 Begin by moving the matrix computation to standalone functions:
 ```python
@@ -192,7 +190,7 @@ Then use a profiler like `line_profiler` to identify the bottlenecks:
 kernprof -l -v main.py
 ```
 
-#### Optimize with Matrix Operations
+### Optimize with Matrix Operations
 
 Try converting the `einsum` to more efficient matrix operations using `numpy.dot` or `numpy.tensordot`:
 ```python
@@ -207,7 +205,7 @@ def compute_coulomb_matrix_v2(eri, dm):
 
 > **Note**: The reshape approach may not always be faster than `einsum` with `optimize=True`, as `einsum` uses optimized BLAS routines internally. Benchmark to compare!
 
-#### Use Advanced Optimization Tools
+### Use Advanced Optimization Tools
 
 For production code or when dealing with large systems, consider using powerful optimization tools:
 
