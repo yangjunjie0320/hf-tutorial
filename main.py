@@ -148,8 +148,11 @@ def main(inp: str) -> None:
 
         # TODO: Implement your restricted Hartree-Fock algorithm in line 9.
         # A reference implementation of RHF is provided, uncomment next line to run it.
-        # from sol import solve_rhf
+        from sol import solve_rhf
+
         ene_rhf_sol = solve_rhf(nelecs, hcore, ovlp, eri, tol=tol, max_iter=200, ene_nuc=ene_nuc)
+
+        print(f"{ene_rhf_sol = :12.8f}, {ene_rhf_ref = :12.8f}, {ene_fci_ref = :12.8f}")
 
         # Uncomment this to check your UHF implementation.
         ene_uhf_sol = None
@@ -174,7 +177,7 @@ def main(inp: str) -> None:
 if __name__ == "__main__":
     # mol can be either h2, heh+ or h2o.
     # r is the bond length in Angstrom.
-    mol = "heh+"
-    r = 1.0
+    mol = "h2o"
+    r = 3.0
     inp = f"{mol}-{r:.4f}"
     ene = main(inp)

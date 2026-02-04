@@ -43,40 +43,71 @@ def solve_rhf(
     # Diagonalize the core Hamiltonian to get the initial guess for density matrix
     energy_mo, coeff_mo = eigh(hcore, ovlp)
     coeff_occ = coeff_mo[:, occ_list]
-    dm_old = numpy.dot(coeff_occ, coeff_occ.T) * 2.0
-    dm_cur = None
-    fock = None
 
-    while not is_converged and not is_max_iter:
-        # Compute the Fock matrix
-        coul = numpy.einsum("pqrs,rs->pq", eri, dm_old)
-        exch = -numpy.einsum("prqs,rs->pq", eri, dm_old) / 2.0
-        fock = hcore + coul + exch
+    def func(x):
+        nvir = nmo - nocc
+        t = numpy.zeros((nmo, nmo))
+        t[:nocc, nocc:] = x.reshape(nocc, nvir)
+        t -= t.T
 
-        # Diagonalize the Fock matrix
-        energy_mo, coeff_mo = eigh(fock, ovlp)
+        from scipy.linalg import expm
 
-        # Compute the new density matrix
-        coeff_occ = coeff_mo[:, occ_list]
-        dm_cur = numpy.dot(coeff_occ, coeff_occ.T) * 2.0
+        c = coeff_mo @ expm(t)
+        cocc = c[:, :nocc]
 
-        # Compute the energy
-        ene_cur = 0.5 * numpy.einsum("pq,pq->", hcore + fock, dm_cur)
-        ene_rhf = ene_cur + ene_nuc
+        dm = numpy.dot(cocc, cocc.T) * 2.0
+        fock = hcore + numpy.einsum("pqrs,rs->pq", eri, dm)
+        fock -= numpy.einsum("prqs,rs->pq", eri, dm) / 2.0
+        return 0.5 * numpy.einsum("pq,pq->", hcore + fock, dm)
 
-        # Compute the errors
-        if ene_old is not None:
-            dm_err = numpy.linalg.norm(dm_cur - dm_old)
-            ene_err = abs(ene_cur - ene_old)
-            print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.2e}, {dm_err: 6.2e}")
+    from scipy.optimize import minimize
 
-        dm_old = dm_cur
-        ene_old = ene_cur
+    res = minimize(
+        func, numpy.zeros(nocc * (nmo - nocc)), method="CG", options={"maxiter": max_iter, "disp": True}, tol=1e-16
+    )
+    print(res.x)
+    print(res.fun + ene_nuc)
 
-        # Check convergence
-        iter_scf += 1
-        is_max_iter = iter_scf >= max_iter
-        is_converged = ene_err < tol and dm_err < tol
+    # dm_old = numpy.dot(coeff_occ, coeff_occ.T) * 2.0
+    # dm_cur = None
+    # fock = None
+
+    # while not is_converged and not is_max_iter:
+    #     # Compute the Fock matrix
+    #     coul = numpy.einsum("pqrs,rs->pq", eri, dm_old)
+    #     exch = -numpy.einsum("prqs,rs->pq", eri, dm_old) / 2.0
+    #     fock = hcore + coul + exch
+
+    #     # Diagonalize the Fock matrix
+    #     energy_mo, coeff_mo = eigh(fock, ovlp)
+
+    #     # Compute the new density matrix
+    #     coeff_occ = coeff_mo[:, occ_list]
+    #     dm_cur = numpy.dot(coeff_occ, coeff_occ.T) * 2.0
+
+    #     # Compute the energy
+    #     ene_cur = 0.5 * numpy.einsum("pq,pq->", hcore + fock, dm_old)
+    #     ene_rhf = ene_cur + ene_nuc
+
+    #     print(f"{ene_rhf = :12.8f}")
+    #     print(f"{ene_nuc = :12.8f}")
+    #     print(f"{ene_cur = :12.8f}")
+
+    #     assert ene_rhf > -80.0
+
+    #     # Compute the errors
+    #     if ene_old is not None:
+    #         dm_err = numpy.linalg.norm(dm_cur - dm_old)
+    #         ene_err = abs(ene_cur - ene_old)
+    #         print(f"SCF iteration {iter_scf:3d}, energy = {ene_rhf: 12.8f}, error = {ene_err: 6.2e}, {dm_err: 6.2e}")
+
+    #     dm_old = dm_cur
+    #     ene_old = ene_cur
+
+    #     # Check convergence
+    #     iter_scf += 1
+    #     is_max_iter = iter_scf >= max_iter
+    #     is_converged = ene_err < tol and dm_err < tol
 
     if is_converged:
         print(f"SCF converged in {iter_scf} iterations.")
@@ -87,4 +118,4 @@ def solve_rhf(
             ene_rhf = 0.0
             print("SCF is not running.")
 
-    return ene_rhf
+    return res.fun + ene_nuc
